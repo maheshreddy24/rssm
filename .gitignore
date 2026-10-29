@@ -9,3 +9,4 @@ mainVisualizations.py
 dreamerVisual.py
 .venv
 cameraCheck
+*.pdf

@@ -117,9 +117,9 @@ DreamerV3 as in the April 2024 version of the paper (arXiv 2301.04104v2), with i
 One GPU. Measured for the default config:
 
 * **GPU memory:** ~4 GB, so an 8 GB GPU is enough. `imageSize: 128` needs ~6 GB, and the larger presets need more.
-* **RAM:** ~20 GB in total by default.
-  * The replay buffer takes ~28 KB per step: 14 GB at `bufferCapacity: 500000`, 7 GB at 250000 (use that on a
-    16 GB machine).
+* **RAM:** ~13 GB in total by default.
+  * The replay buffer takes ~28 KB per step: 7 GB at the default `bufferCapacity: 250000` (the last ~5,800
+    episodes), 14 GB at 500000.
   * Each env worker takes ~0.35 GB, and the training process ~3 GB.
   * The buffer fills gradually, so `main.py` prints its final size at startup and warns if it won't fit.
 * **Speed:** each env process steps at ~100 steps/s. Training speed depends on the GPU and is logged as

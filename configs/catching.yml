@@ -1,0 +1,82 @@
+# DreamerV3 on BallisticCatch (dynamic-environments). Values follow the DreamerV3 paper (arXiv 2301.04104v2,
+# Table 4) unless marked "task". Any value can be overridden from the command line: --set dreamer.batchSize=8
+runName: dv3
+seed: 1
+device: cuda
+
+environment:
+    name: BallisticCatch
+    imageSize: 96               # task: 96 -> 6x6 CNN bottleneck (the paper's other option is 64 -> 4x4); ball is ~4 px
+    camera: wide                # task: policy camera from envs/catching.py CAMERAS (paper | wide | close)
+    posScale: 0.04              # task: metres per step at |action| = 1, i.e. 1.2 m/s, the scripted expert's speed
+    randomizeCamera: False      # task: True = the paper's per-episode camera jitter
+    randomizeLighting: True
+    task: {}                    # task: BallisticCatch config overrides, e.g. {launcher_y_range: [-0.4, 0.4]}
+    reward:                     # task: see envs/rewards.py
+        catch: 1.0              # ball caught (env success)
+        progress: 1.0           # per metre the net gets closer to the ball's future falling path
+        precision: 0.02         # per step, times exp(-precisionScale * distance^2)
+        precisionScale: 50      # 50 is Catch It!'s value, ~0.7 at the net rim (8.5 cm)
+        action: 0.0             # penalty per step, times ||action||^2
+
+numEnvs: 8                      # parallel env processes (1 = run in this process, easier to debug)
+envSteps: 1000000
+replayRatio: 512                # trained steps per collected step: 512/(16*64) = 0.5 gradient steps per env step
+prefillSteps: 5000              # env steps collected (with the initial policy) before training starts
+
+logInterval: 5000               # env steps
+evaluationInterval: 50000       # env steps; also writes a checkpoint and videos
+numEvaluationEpisodes: 20
+saveMetrics: True
+saveCheckpoints: True
+resume: False
+checkpointToLoad: 500k
+
+dreamer:
+    batchSize: 16
+    batchLength: 64
+    imaginationHorizon: 15
+    mixedPrecision: True        # bfloat16 compute on GPUs that support it (as the reference DreamerV3)
+    bufferCapacity: 500000      # steps; ~27 KB each at 96x96 -> ~14 GB of RAM when full
+
+    learningRate: 0.00004       # LaProp, same for world model, actor and critic
+    optimizerEpsilon: 1.0e-20
+    adaptiveGradientClip: 0.3
+
+    betaDynamics: 1.0
+    betaRepresentation: 0.1
+    freeNats: 1.0
+
+    discount: 0.997             # horizon 1/(1 - discount) = 333
+    lambda_: 0.95
+    entropyScale: 0.0003
+    returnNormDecay: 0.99       # EMA of the 5th-95th return percentile range
+    returnNormLimit: 1.0
+    criticEMADecay: 0.98
+    criticEMARegularizer: 1.0
+    criticReplayScale: 0.3
+
+    model:                      # 12M preset (paper Table 3). 25M: hiddenSize 384, recurrentSize 3072, latentClasses 24, cnnDepth 24
+        hiddenSize: 256         #                             50M: hiddenSize 512, recurrentSize 4096, latentClasses 32, cnnDepth 32
+        recurrentSize: 2048     # 8 x hiddenSize, split into 8 blocks
+        blocks: 8
+        latentLength: 32
+        latentClasses: 16
+        cnnDepth: 16
+        uniformMix: 0.01
+        priorLayers: 2
+        posteriorLayers: 1
+        encoderLayers: 3        # MLP for the state vector
+        decoderLayers: 3
+        rewardLayers: 1
+        continueLayers: 1
+        actorLayers: 3
+        criticLayers: 3
+        twoHotBins: 255
+        actorStd: [0.1, 1.0]
+
+folderNames:
+    metricsFolder: metrics
+    plotsFolder: plots
+    checkpointsFolder: checkpoints
+    videosFolder: videos

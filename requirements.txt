@@ -1,0 +1,11 @@
+gymnasium
+torch>=2.4
+numpy
+imageio
+imageio-ffmpeg
+pandas
+plotly
+attridict
+pyyaml
+pillow
+mujoco>=3.3

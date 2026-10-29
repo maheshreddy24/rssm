@@ -1,0 +1,70 @@
+# DreamerV3 on CarRacing-v3 (image observations only). Same agent settings as configs/catching.yml.
+runName: dv3
+seed: 1
+device: cuda
+
+environment:
+    name: CarRacing-v3
+    imageSize: 64
+
+numEnvs: 4
+envSteps: 1000000
+replayRatio: 512
+prefillSteps: 5000
+
+logInterval: 5000
+evaluationInterval: 50000
+numEvaluationEpisodes: 5
+saveMetrics: True
+saveCheckpoints: True
+resume: False
+checkpointToLoad: 500k
+
+dreamer:
+    batchSize: 16
+    batchLength: 64
+    imaginationHorizon: 15
+    mixedPrecision: True        # bfloat16 compute on GPUs that support it (as the reference DreamerV3)
+    bufferCapacity: 500000      # steps; ~12 KB each at 64x64
+
+    learningRate: 0.00004       # LaProp, same for world model, actor and critic
+    optimizerEpsilon: 1.0e-20
+    adaptiveGradientClip: 0.3
+
+    betaDynamics: 1.0
+    betaRepresentation: 0.1
+    freeNats: 1.0
+
+    discount: 0.997             # horizon 1/(1 - discount) = 333
+    lambda_: 0.95
+    entropyScale: 0.0003
+    returnNormDecay: 0.99       # EMA of the 5th-95th return percentile range
+    returnNormLimit: 1.0
+    criticEMADecay: 0.98
+    criticEMARegularizer: 1.0
+    criticReplayScale: 0.3
+
+    model:                      # 12M preset (paper Table 3). 25M: hiddenSize 384, recurrentSize 3072, latentClasses 24, cnnDepth 24
+        hiddenSize: 256         #                             50M: hiddenSize 512, recurrentSize 4096, latentClasses 32, cnnDepth 32
+        recurrentSize: 2048     # 8 x hiddenSize, split into 8 blocks
+        blocks: 8
+        latentLength: 32
+        latentClasses: 16
+        cnnDepth: 16
+        uniformMix: 0.01
+        priorLayers: 2
+        posteriorLayers: 1
+        encoderLayers: 3        # MLP for the state vector
+        decoderLayers: 3
+        rewardLayers: 1
+        continueLayers: 1
+        actorLayers: 3
+        criticLayers: 3
+        twoHotBins: 255
+        actorStd: [0.1, 1.0]
+
+folderNames:
+    metricsFolder: metrics
+    plotsFolder: plots
+    checkpointsFolder: checkpoints
+    videosFolder: videos

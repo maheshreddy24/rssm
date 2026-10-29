@@ -33,6 +33,10 @@ def main(configFile, overrides=()):
 
     dreamer = Dreamer(envs.observationShapes, envs.actionSize, device, config.dreamer)
     buffer  = ReplayBuffer(envs.observationShapes, envs.actionSize, config.numEnvs, config.dreamer.bufferCapacity, device)
+    bufferGB, machineGB = buffer.nbytes()/1e9, os.sysconf("SC_PAGE_SIZE")*os.sysconf("SC_PHYS_PAGES")/1e9
+    print(f"Replay buffer fills up to {bufferGB:.1f} GB of RAM (machine has {machineGB:.0f} GB); env workers need ~0.35 GB each")
+    if bufferGB + 0.35*config.numEnvs + 3 > machineGB:
+        print("WARNING: that will not fit in RAM and the run will crash once the buffer fills; lower dreamer.bufferCapacity")
     if config.resume:
         dreamer.loadCheckpoint(checkpointToLoad)
     print(f"Parameters: world model {sum(p.numel() for p in dreamer.worldModelParameters)/1e6:.1f}M, "

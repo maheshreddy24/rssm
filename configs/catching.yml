@@ -37,7 +37,7 @@ dreamer:
     batchLength: 64
     imaginationHorizon: 15
     mixedPrecision: True        # bfloat16 compute on GPUs that support it (as the reference DreamerV3)
-    bufferCapacity: 500000      # steps; ~27 KB each at 96x96 -> ~14 GB of RAM when full
+    bufferCapacity: 500000      # steps; ~28 KB each at 96x96 -> ~14 GB of RAM when full (250000 for a 16 GB machine)
 
     learningRate: 0.00004       # LaProp, same for world model, actor and critic
     optimizerEpsilon: 1.0e-20

@@ -24,7 +24,9 @@ def _withoutMainScript():
     """spawn re-imports the parent's script (main.py, and with it torch, pandas, plotly) in every worker, ~500 MB each.
     Workers only need the env, which is imported by module name, so hide the script while they start."""
     main = sys.modules["__main__"]
-    saved = {key: main.__dict__.pop(key) for key in ("__file__", "__spec__") if key in main.__dict__}
+    saved = {key: main.__dict__[key] for key in ("__file__", "__spec__") if key in main.__dict__}
+    main.__dict__.pop("__file__", None)
+    main.__spec__ = None
     try:
         yield
     finally:

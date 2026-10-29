@@ -26,6 +26,10 @@ class ReplayBuffer:
     def __len__(self):
         return self.size*self.numEnvs
 
+    def nbytes(self):
+        """RAM once full. The arrays are allocated lazily, so usage grows as steps are added."""
+        return sum(array.nbytes for array in self.data.values())
+
     def add(self, observations, actions):
         """observations: dict of arrays with a leading env axis (as returned by the envs), actions: (numEnvs, actionSize)."""
         for key in self.observationKeys + ["reward", "isFirst", "isTerminal"]:

@@ -75,6 +75,11 @@ dreamer:
         twoHotBins: 255
         actorStd: [0.1, 1.0]
 
+wandb:
+    project: rssm
+    entity: null                # wandb user or team; null = your default
+    mode: online                # online | offline | disabled
+
 folderNames:
     metricsFolder: metrics
     plotsFolder: plots

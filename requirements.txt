@@ -9,3 +9,5 @@ attridict
 pyyaml
 pillow
 mujoco>=3.3
+tqdm
+wandb

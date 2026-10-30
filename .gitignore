@@ -10,3 +10,4 @@ dreamerVisual.py
 .venv
 cameraCheck
 *.pdf
+wandb

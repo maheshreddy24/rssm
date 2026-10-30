@@ -8,6 +8,7 @@ Actions:      [dx, dy, dz] in [-1, 1], end-effector position deltas. The net sta
 import os
 import sys
 
+os.environ.setdefault("MUJOCO_GL", "egl")  # headless GPU rendering; MuJoCo's default (GLFW) needs an X display
 import numpy as np
 
 try:

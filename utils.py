@@ -6,8 +6,10 @@ import yaml
 import os
 import attridict
 import csv
+import logging
 import pandas as pd
 import plotly.graph_objects as pgo
+from tqdm import tqdm
 
 
 def seedEverything(seed):
@@ -144,6 +146,27 @@ def replayLambdaReturns(rewards, isTerminal, isFirst, bootstrap, discount, lambd
         returns.append(sameEpisode*target + (1.0 - sameEpisode)*bootstrap[:, t])
         masks.append(sameEpisode)
     return torch.stack(returns[::-1][:-1], 1), torch.stack(masks[::-1], 1)
+
+
+class TqdmHandler(logging.Handler):
+    """Prints log records above the progress bar instead of through it."""
+    def emit(self, record):
+        tqdm.write(self.format(record))
+
+
+def setupLogger(filename):
+    """Logger "dreamer": plain messages on the console, timestamped ones appended to filename."""
+    logger = logging.getLogger("dreamer")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    logger.handlers.clear()
+    console = TqdmHandler()
+    console.setFormatter(logging.Formatter("%(message)s"))
+    file = logging.FileHandler(filename)
+    file.setFormatter(logging.Formatter("%(asctime)s | %(levelname)-7s | %(message)s", "%Y-%m-%d %H:%M:%S"))
+    logger.addHandler(console)
+    logger.addHandler(file)
+    return logger
 
 
 def ensureParentFolders(*paths):
